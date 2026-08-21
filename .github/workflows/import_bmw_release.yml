@@ -1,0 +1,39 @@
+name: import-bmw-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download ZIP
+        run: |
+          mkdir -p tmp
+          curl -fSL -o tmp/BMW_g20_Dom_v1.4_UNZIP.zip "https://d.modshost.live/wp-content/uploads/2026/08/BMW_g20_Dom_v1.4_UNZIP.zip"
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: import-bmw-${{ github.run_id }}
+          release_name: BMW_g20_Dom_v1.4
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: tmp/BMW_g20_Dom_v1.4_UNZIP.zip
+          asset_name: BMW_g20_Dom_v1.4_UNZIP.zip
+          asset_content_type: application/zip
+
+      - name: Report
+        run: echo "Release created and asset uploaded."
